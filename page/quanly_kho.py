@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 import webbrowser
 
-# 🔴 TÍCH HỢP PANDAS & NUMPY THEO YÊU CẦU ĐỀ BÀI (10/10 ĐIỂM)
+
 # Cơ chế phòng vệ thông minh tránh sập phần mềm khi máy chấm thi thiếu thư viện
 try:
     import pandas as pd
@@ -618,37 +618,39 @@ class QuanLyKhoPage:
         self.lbl_stat_pre = tk.Label(stats_f, text="🔵 Đang có Pre-order: -- mẫu", font=("Segoe UI", 10, "bold"),
                                      fg=self.color_info, bg="white")
         self.lbl_stat_pre.pack(anchor="w", pady=4)
-
+        
     def on_row_select(self, event):
         sel = self.tree_stock.selection()
-<<<<<<< HEAD
+        # 1. Chặn chọn nhiều dòng theo yêu cầu phi chức năng
         if len(sel) > 1:
             messagebox.showwarning("Cảnh báo", "Hệ thống chỉ cho phép chọn 1 dòng duy nhất để sửa thông tin!")
-        return
-        
+            return
+            
         if not sel:
             messagebox.showwarning("Thông báo", "Vui lòng chọn một dòng để sửa!")
-        return
-=======
-        if not sel: return
-        vals = self.tree_stock.item(sel[0], "values")
->>>>>>> d3bc5a42d2928ea8745e91b96ca5a135ec1b1257
+            return
 
-        # Mở khóa và tự điền dữ liệu sạch
+        # 2. Bóc tách dữ liệu bám bảng (Đã dọn sạch dấu vết Git thừa)
+        vals = self.tree_stock.item(sel[0], "values")
+        # Mở khóa và tự điền dữ liệu sạch vào form nhập liệu
         self.ents["ID"].config(state="normal")
         self.ents["ID"].delete(0, tk.END)
         self.ents["ID"].insert(0, vals[1])
+        
         self.ents["Name"].delete(0, tk.END)
         self.ents["Name"].insert(0, vals[2])
+        
         self.ents["Grade"].set(vals[3])
+        
         self.ents["Stock"].delete(0, tk.END)
         self.ents["Stock"].insert(0, vals[4])
+        
         self.ents["Price"].delete(0, tk.END)
-
-        # Bóc tách đơn giá sạch để phục vụ edit
+        
+        # Bóc tách đơn giá sạch để phục vụ edit (Xóa dấu phẩy phân tách nghìn nếu có)
         raw_price = vals[6].replace(",", "")
         self.ents["Price"].insert(0, raw_price)
-
+        
         self.edit_mode = True
         self.current_edit_id = vals[1]
         self.ents["ID"].config(state="disabled")  # Khóa ID không cho sửa
