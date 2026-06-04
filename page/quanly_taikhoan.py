@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import csv
+import os
+from common.button import CustomButton
 
 
 class QuanLyTaiKhoanPage:
@@ -15,11 +18,12 @@ class QuanLyTaiKhoanPage:
         self.color_warning = "#e67e22"  # Cam
         self.color_danger = "#d63031"   # Đỏ
 
-        # Khởi tạo thuộc tính tệp
+        # Khởi tạo các thuộc tính giao diện
         self.tree1 = None
         self.tree2 = None
         self.search_user_entry = None
         self.btn_save = None
+        self.nb = None  # Khởi tạo đối tượng Notebook quản lý Tab
 
         self.ents = {}
         self.edit_mode = False
@@ -29,25 +33,25 @@ class QuanLyTaiKhoanPage:
         self.load_history()
 
     def view(self):
-        # Header Navy Blue
+        # Header Navy Blue hiển thị tiêu đề hệ thống quản trị
         header = tk.Frame(self.master, bg=self.color_navy)
         header.pack(fill="x")
         tk.Label(header, text="👤 QUẢN TRỊ NHÂN SỰ & HỆ THỐNG", font=("Segoe UI", 18, "bold"),
                  fg="white", bg=self.color_navy).pack(pady=20)
 
-        # Body chính
+        # Body chính làm nền chứa dữ liệu
         body = tk.Frame(self.master, bg=self.color_light)
         body.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # Hệ thống Tab Notebook
-        nb = ttk.Notebook(body)
-        nb.pack(fill="both", expand=True)
+        # Hệ thống Tab Notebook phân chia chức năng
+        self.nb = ttk.Notebook(body)
+        self.nb.pack(fill="both", expand=True)
 
         # --- TAB 1: DANH SÁCH NHÂN VIÊN ---
-        tab_nv = tk.Frame(nb, bg="white")
-        nb.add(tab_nv, text=" 👥 Danh sách nhân viên ")
+        tab_nv = tk.Frame(self.nb, bg="white")
+        self.nb.add(tab_nv, text=" 👥 Danh sách nhân viên ")
 
-        # Thanh tìm kiếm & Xóa nhanh phía trên
+        # Thanh tìm kiếm & bộ nút bấm công cụ nhanh phía trên
         search_f = tk.Frame(tab_nv, bg="white", pady=10)
         search_f.pack(fill="x", padx=10)
 
@@ -62,12 +66,11 @@ class QuanLyTaiKhoanPage:
         tk.Button(search_f, text="🔄 Làm mới bảng", bg=self.color_dark, fg="white", font=("Arial", 9),
                   command=self.refresh_users, bd=0, padx=15, pady=5, cursor="hand2").pack(side="right", padx=5)
 
-        # Bảng hiển thị Treeview nhân viên
+        # Bảng hiển thị Treeview danh sách nhân viên
         tree_f = tk.Frame(tab_nv)
         tree_f.pack(fill="both", expand=True, padx=10, pady=5)
 
         cols = ("STT", "U", "N", "P", "R")
-        # noinspection PyTypeChecker
         self.tree1 = ttk.Treeview(tree_f, columns=cols, show="headings", height=5)
 
         heads = ["STT", "TÊN ĐĂNG NHẬP", "HỌ VÀ TÊN", "SỐ ĐIỆN THOẠI", "VAI TRÒ"]
@@ -89,7 +92,7 @@ class QuanLyTaiKhoanPage:
         inputs_container = tk.Frame(form_f, bg="white")
         inputs_container.pack(fill="x")
 
-        # Khai báo cấu trúc các ô nhập liệu
+        # Cấu trúc form biểu mẫu nhập liệu
         fields = [
             ("Tên đăng nhập:", "Username", 12, True),
             ("Mật khẩu:", "Password", 12, True),
@@ -101,18 +104,17 @@ class QuanLyTaiKhoanPage:
         for i, (txt, key, width_val, is_entry) in enumerate(fields):
             col = i * 2
             tk.Label(inputs_container, text=txt, bg="white", font=("Arial", 9, "bold")).grid(row=0, column=col,
-                                                                                             sticky="w", padx=(10, 2))
-
+                                                                                            sticky="w", padx=(10, 2))
             if is_entry:
                 e = tk.Entry(inputs_container, font=("Arial", 10), bd=1, relief="solid", width=width_val)
                 e.grid(row=0, column=col + 1, padx=5, ipady=2)
             else:
                 e = ttk.Combobox(inputs_container, values=["Admin", "Nhân viên"], state="readonly", width=width_val)
                 e.grid(row=0, column=col + 1, padx=5)
-                e.current(1)  # Mặc định chọn Nhân viên
+                e.current(1)
             self.ents[key] = e
 
-        # Nhóm nút bấm hành động của form
+        # Nút bấm thao tác lưu dữ liệu trên Form
         btn_container = tk.Frame(inputs_container, bg="white")
         btn_container.grid(row=0, column=10, padx=(15, 0), sticky="e")
 
@@ -130,14 +132,13 @@ class QuanLyTaiKhoanPage:
         inputs_container.columnconfigure(5, weight=2)
 
         # --- TAB 2: NHẬT KÝ ĐĂNG NHẬP ---
-        tab_ls = tk.Frame(nb, bg="white")
-        nb.add(tab_ls, text=" 📜 Nhật ký hệ thống ")
+        tab_ls = tk.Frame(self.nb, bg="white")
+        self.nb.add(tab_ls, text=" 📜 Nhật ký hệ thống ")
 
         tree_f2 = tk.Frame(tab_ls)
         tree_f2.pack(fill="both", expand=True, padx=10, pady=10)
 
         cols2 = ("STT", "U", "T", "A")
-        # noinspection PyTypeChecker
         self.tree2 = ttk.Treeview(tree_f2, columns=cols2, show="headings", height=5)
         heads2 = ["STT", "TÀI KHOẢN", "THỜI GIAN ĐĂNG NHẬP", "TRẠNG THÁI"]
         for c, h in zip(cols2, heads2):
@@ -148,8 +149,8 @@ class QuanLyTaiKhoanPage:
         self.tree2.pack(side="left", fill="both", expand=True)
         ttk.Scrollbar(tree_f2, command=self.tree2.yview).pack(side="right", fill="y")
 
-        # Chân trang (Footer) chứa nút Quay lại an toàn, tránh lỗi đè chữ
-        footer_bar = tk.Frame(body, bg=self.color_light)
+        # Chân trang điều hướng an toàn bám sát cửa sổ
+        footer_bar = tk.Frame(self.master, bg=self.color_light)
         footer_bar.pack(fill="x", pady=(10, 0))
 
         tk.Button(footer_bar, text="⬅ QUAY LẠI MENU CHÍNH", command=self.app_manager.show_menu_page,
@@ -163,15 +164,14 @@ class QuanLyTaiKhoanPage:
 
         username = vals[1]
 
-        # 1. Truy vấn lấy mật khẩu thực tế từ cơ sở dữ liệu để tự động đổ vào form nhập liệu
+        # Đồng bộ lấy dữ liệu qua SQL phục vụ cập nhật biểu mẫu nhập liệu
         res = self.app_manager.db.query("SELECT password FROM users WHERE username=?", (username,))
         password = res[0][0] if res else ""
 
-        # 2. Mở khóa ô Username để điền thông tin sau đó khóa lại
         self.ents["Username"].config(state="normal")
         self.ents["Username"].delete(0, tk.END)
         self.ents["Username"].insert(0, username)
-        self.ents["Username"].config(state="disabled")  # Khóa lại không cho sửa username
+        self.ents["Username"].config(state="disabled")  # Khóa bảo vệ trường ID tài khoản chính
 
         self.ents["Password"].delete(0, tk.END)
         self.ents["Password"].insert(0, password)
@@ -188,7 +188,7 @@ class QuanLyTaiKhoanPage:
         self.btn_save.config(text="📝 CẬP NHẬT", bg=self.color_warning)
 
     def save_user_logic(self):
-        """XỬ LÝ LƯU HOẶC CẬP NHẬT THÔNG TIN NHÂN SỰ TRỰC TIẾP"""
+        """XỬ LÝ LƯU HOẶC CẬP NHẬT THÔNG TIN NHÂN SỰ TRỰC TIẾP QUA SQL"""
         username = self.ents["Username"].get().strip()
         password = self.ents["Password"].get().strip()
         fullname = self.ents["Fullname"].get().strip()
@@ -201,19 +201,15 @@ class QuanLyTaiKhoanPage:
 
         try:
             if self.edit_mode:
-                # 1. Cập nhật thông tin nhân viên có sẵn
                 self.app_manager.db.query(
                     "UPDATE users SET password=?, fullname=?, phone=?, role=? WHERE username=?",
                     (password, fullname, phone, role, username)
                 )
                 messagebox.showinfo("Thành công", f"Đã cập nhật thông tin nhân viên '{fullname}' thành công!")
             else:
-                # 2. Đăng ký nhân viên mới hoàn toàn
-                # Kiểm tra trùng tên đăng nhập
                 exists = self.app_manager.db.query("SELECT username FROM users WHERE username=?", (username,))
                 if exists:
-                    messagebox.showerror("Lỗi",
-                                         f"Tên đăng nhập '{username}' đã tồn tại! Vui lòng chọn tên đăng nhập khác.")
+                    messagebox.showerror("Lỗi", f"Tên đăng nhập '{username}' đã tồn tại!")
                     return
 
                 self.app_manager.db.query(
@@ -231,14 +227,14 @@ class QuanLyTaiKhoanPage:
         """XÓA TÀI KHOẢN NHÂN VIÊN VỚI CƠ CHẾ BẢO VỆ ADMIN"""
         sel = self.tree1.selection()
         if not sel:
-            messagebox.showwarning("Thông báo", "Vui lòng chọn nhân viên cần xóa trong danh sách bảng!")
+            messagebox.showwarning("!", "Vui lòng chọn nhân viên cần thao tác!")
             return
 
         vals = self.tree1.item(sel[0], "values")
         username = vals[1]
         fullname = vals[2]
 
-        # Cơ chế bảo vệ tài khoản quản trị viên tối cao cố định của hệ thống
+        # Kiểm tra ngăn chặn hành vi xóa quyền quản trị hệ thống cốt lõi
         if username.lower() in ["admin", "a"]:
             messagebox.showerror("Bảo mật hệ thống", "Không được phép xóa tài khoản quản trị viên tối cao (Admin/a)!")
             return
@@ -254,7 +250,8 @@ class QuanLyTaiKhoanPage:
                 messagebox.showerror("Lỗi hệ thống", f"Không thể xóa nhân viên: {e}")
 
     def refresh_users(self):
-        self.search_user_entry.delete(0, tk.END)
+        if self.search_user_entry:
+            self.search_user_entry.delete(0, tk.END)
         self.clear_form()
         self.load_users()
         self.load_history()
@@ -266,14 +263,15 @@ class QuanLyTaiKhoanPage:
         self.ents["Password"].delete(0, tk.END)
         self.ents["Fullname"].delete(0, tk.END)
         self.ents["Phone"].delete(0, tk.END)
-        self.ents["Role"].current(1)  # Chọn sẵn mặc định Nhân viên
+        self.ents["Role"].current(1)
         self.btn_save.config(text="➕ THÊM MỚI", bg=self.color_success)
 
     def load_users(self):
         if not self.tree1: return
         for i in self.tree1.get_children(): self.tree1.delete(i)
 
-        term = f"%{self.search_user_entry.get().lower().strip()}%"
+        user_input = self.search_user_entry.get().lower().strip() if self.search_user_entry else ""
+        term = f"%{user_input}%"
         sql = "SELECT username, fullname, phone, role FROM users WHERE username LIKE ? OR fullname LIKE ?"
 
         try:
@@ -288,7 +286,6 @@ class QuanLyTaiKhoanPage:
         for i in self.tree2.get_children(): self.tree2.delete(i)
 
         sql = "SELECT username, time, status FROM login_history ORDER BY time DESC"
-
         try:
             rows = self.app_manager.db.query(sql)
             for idx, r in enumerate(rows, 1):
