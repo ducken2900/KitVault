@@ -27,7 +27,6 @@ class BaoCaoPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-
         # --- CẤU HÌNH MÀU SẮC ĐỒNG BỘ COMMAND CENTER ---
         self.color_navy = "#1e3799"
         self.color_dark = "#2d3436"

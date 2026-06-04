@@ -7,9 +7,8 @@ from page.register import RegisterPage
 from page.quanly_kho import QuanLyKhoPage
 from page.quanly_taikhoan import QuanLyTaiKhoanPage
 from page.sua_nhanvien import SuaNhanVienPage
-from page.baocao import BaoCaoPage
 from page.quanly_donhang import QuanLyDonHangPage
-
+from page.baocao import BaoCaoPage
 
 class AppManager:
     def __init__(self):
@@ -45,7 +44,7 @@ class AppManager:
 
     def show_menu_page(self):
         self.clear_current_page()
-        self.root.geometry("550x700")
+        self.root.geometry("1280x800")
         self.current_page = MenuPage(self.root, self)
 
     def show_register_page(self):
@@ -55,29 +54,34 @@ class AppManager:
 
     def show_quanly_kho_page(self):
         self.clear_current_page()
-        self.root.geometry("1250x800")
+        self.root.geometry("1280x800")
         self.current_page = QuanLyKhoPage(self.root, self)
 
     def show_quanly_donhang_page(self, prefill_phone=None):
         """Mở quầy bán hàng và nhận SĐT khách tự động truyền từ ngoài vào"""
         self.clear_current_page()
-        self.root.geometry("1300x800")
+        self.root.geometry("1280x800")
         self.current_page = QuanLyDonHangPage(self.root, self, prefill_phone)
 
     def show_quanly_taikhoan_page(self):
         self.clear_current_page()
-        self.root.geometry("1000x650")
+        self.root.geometry("1280x800")
         self.current_page = QuanLyTaiKhoanPage(self.root, self)
 
     def show_baocao_page(self):
         self.clear_current_page()
-        self.root.geometry("1000x750")
+        self.root.geometry("1280x800")
         self.current_page = BaoCaoPage(self.root, self)
 
     def show_sua_nhanvien_page(self, data):
         self.clear_current_page()
         self.root.geometry("500x600")
         self.current_page = SuaNhanVienPage(self.root, self, data)
+
+    def show_baocao_page(self):  # HÀM MỞ TRANG BÁO CÁO
+        self.clear_current_page()
+        self.root.geometry("1280x800")
+        self.current_page = BaoCaoPage(self.root, self)
 
     def run(self):
         self.root.mainloop()

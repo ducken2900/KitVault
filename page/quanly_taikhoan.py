@@ -6,7 +6,6 @@ class QuanLyTaiKhoanPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-
         # --- CẤU HÌNH MÀU SẮC ĐỒNG BỘ ---
         self.color_navy = "#1e3799"
         self.color_dark = "#2d3436"
@@ -153,12 +152,17 @@ class QuanLyTaiKhoanPage:
         footer_bar.pack(fill="x", pady=(10, 0))
 
         tk.Button(footer_bar, text="⬅ QUAY LẠI MENU CHÍNH", command=self.app_manager.show_menu_page,
-                  bg="#2d3436", fg="white", font=("Segoe UI", 10, "bold"), bd=0, padx=25, pady=8, cursor="hand2").pack(
+                  bg="#e74c3c", fg="white", font=("Segoe UI", 10, "bold"), bd=0, padx=25, pady=8, cursor="hand2").pack(
             anchor="center")
 
     def on_user_select(self, event):
         sel = self.tree1.selection()
-        if not sel: return
+        if len(sel) > 1:
+            messagebox.showwarning("Cảnh báo", "Bạn chỉ được chọn tối đa 1 tài khoản nhân viên để chỉnh sửa!")
+        return
+        
+        if not sel:
+            return
         vals = self.tree1.item(sel[0], "values")
 
         username = vals[1]
