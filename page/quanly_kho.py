@@ -621,6 +621,7 @@ class QuanLyKhoPage:
 
     def on_row_select(self, event):
         sel = self.tree_stock.selection()
+<<<<<<< HEAD
         if len(sel) > 1:
             messagebox.showwarning("Cảnh báo", "Hệ thống chỉ cho phép chọn 1 dòng duy nhất để sửa thông tin!")
         return
@@ -628,6 +629,10 @@ class QuanLyKhoPage:
         if not sel:
             messagebox.showwarning("Thông báo", "Vui lòng chọn một dòng để sửa!")
         return
+=======
+        if not sel: return
+        vals = self.tree_stock.item(sel[0], "values")
+>>>>>>> d3bc5a42d2928ea8745e91b96ca5a135ec1b1257
 
         # Mở khóa và tự điền dữ liệu sạch
         self.ents["ID"].config(state="normal")

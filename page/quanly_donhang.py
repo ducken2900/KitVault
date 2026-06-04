@@ -36,11 +36,19 @@ class QuanLyDonHangPage:
 
     def view(self):
         # Header - Phong cách Mecha Dark Cao cấp
+<<<<<<< HEAD
         header = tk.Frame(self.master, bg="#1e3799")
         header.pack(fill="x")
 
         tk.Label(header, text="🛒 TRẠM GIAO DỊCH BÁN HÀNG POS", font=("Segoe UI", 20, "bold"),
                  fg="white", bg="#1e3799").pack(side="left", padx=20, pady=15)
+=======
+        header = tk.Frame(self.master, bg="#2c3e50")
+        header.pack(fill="x")
+
+        tk.Label(header, text="🛒 TRẠM GIAO DỊCH BÁN HÀNG POS", font=("Segoe UI", 20, "bold"),
+                 fg="#1abc9c", bg="#2c3e50").pack(side="left", padx=20, pady=15)
+>>>>>>> d3bc5a42d2928ea8745e91b96ca5a135ec1b1257
 
         tk.Button(header, text="QUAY LẠI MENU", command=self.app_manager.show_menu_page,
                   bg="#e74c3c", fg="white", font=("Segoe UI", 10, "bold"), bd=0, padx=20, cursor="hand2").pack(
