@@ -1,114 +1,78 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
-import csv
-import os
-from common.button import CustomButton
+from tkinter import messagebox
 
 
 class SuaNhanVienPage:
     def __init__(self, master, app_manager, data):
         self.master = master
         self.app_manager = app_manager
-        # data chứa: [User, Pass, Name, Phone, Mission]
+        # data chứa thông tin nhân viên được truyền từ bảng: [User, Pass, Name, Phone, Role]
         self.data = data
-        self.old_username = data[0]  # Giữ lại User cũ để tìm dòng trong file
+        self.old_username = data[0]  # Lưu giữ Tên đăng nhập gốc để làm điều kiện WHERE trong SQL
         self.ents = {}
+
         self.view()
 
     def view(self):
-        # Tiêu đề trang
-        tk.Label(self.master, text="SỬA NHÂN VIÊN", font=("Arial", 22, "bold"), fg="#e67e22").pack(pady=20)
+        # Header - Phong cách Mecha Dark
+        header = tk.Frame(self.master, bg="#2d3436")
+        header.pack(fill="x")
+        tk.Label(header, text="⚙️ PHÂN CÔNG NHÂN SỰ", font=("Segoe UI", 18, "bold"),
+                 fg="#00a8ff", bg="#2d3436").pack(pady=20)
 
-        # Danh sách nhiệm vụ cụ thể trong Shop Gundam
-        self.mission_list = [
-            "Nhân viên",  # Quyền mặc định
-            "Quản lý tổng (Admin)",
-            "Tư vấn bán hàng (Am hiểu HG/MG/PG)",
-            "Kỹ thuật viên (Ráp mẫu trưng bày)",
-            "Nhân viên kho (Kiểm hàng & Nhập hàng)",
-            "Thu ngân"
-        ]
+        # Khung chứa Form nhập liệu
+        form = tk.Frame(self.master, padx=40)
+        form.pack(pady=20, fill="both")
 
+        # Danh sách nhãn và tương ứng trường dữ liệu nhập
         labels = ["User:", "Pass:", "Tên:", "SĐT:", "Quyền:"]
 
-        form = tk.Frame(self.master)
-        form.pack(padx=40, fill="x")
-
+        # Vòng lặp dựng các ô nhập liệu dạng lưới
         for i, txt in enumerate(labels):
-            tk.Label(form, text=txt, font=("Arial", 10, "bold")).grid(row=i, column=0, sticky="w", pady=10)
+            tk.Label(form, text=txt, font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=10)
 
-            # Lấy giá trị cũ từ dữ liệu được truyền vào
+            # Đổ dữ liệu cũ của nhân sự được chọn vào các trường nhập tương ứng
             old_val = self.data[i] if i < len(self.data) else ""
 
-            if txt == "Quyền:":
-                # Ô chọn nhiệm vụ (Combobox)
-                self.ents[txt] = ttk.Combobox(form, values=self.mission_list, state="readonly", font=("Arial", 10))
-                self.ents[txt].grid(row=i, column=1, sticky="ew", padx=10)
+            e = tk.Entry(form, font=("Arial", 11), bd=0, highlightthickness=1, highlightbackground="#dfe6e9")
+            e.grid(row=i, column=1, sticky="ew", padx=10, ipady=5)
+            e.insert(0, old_val)
 
-                # Nếu nhiệm vụ cũ có trong danh sách thì chọn nó, nếu không thì hiện đúng chữ đó
-                if old_val in self.mission_list:
-                    self.ents[txt].set(old_val)
-                else:
-                    # Trường hợp dữ liệu cũ là "Tư vấn bán hàng..." như trong ảnh của bạn
-                    self.ents[txt].set(old_val)
-            else:
-                # Các ô nhập text
-                e = tk.Entry(form, font=("Arial", 10), bd=1, relief="solid")
-                e.grid(row=i, column=1, sticky="ew", padx=10)
-                e.insert(0, old_val)
-                self.ents[txt] = e
+            # KHÓA TÊN ĐĂNG NHẬP: Không cho phép sửa Username để bảo toàn tính toàn vẹn cơ sở dữ liệu
+            if txt == "User:":
+                e.config(state="disabled", disabledbackground="#dfe6e9")
 
-        form.columnconfigure(1, weight=1)
+            self.ents[txt] = e
 
-        # Nút Cập nhật màu cam như trong ảnh
-        btn_update = tk.Button(self.master, text="CẬP NHẬT", command=self.update,
-                               bg="#ffa500", fg="black", font=("Arial", 10, "bold"), height=2)
+        form.grid_columnconfigure(1, weight=1)
+
+        # Nút xác nhận lưu cập nhật thông tin nhân viên
+        btn_update = tk.Button(self.master, text="CẬP NHẬT NHÂN SỰ", command=self.update,
+                               bg="#ffa500", fg="black", font=("Segoe UI", 10, "bold"),
+                               bd=0, height=2, cursor="hand2")
         btn_update.pack(pady=20, fill="x", padx=100)
 
-        # Nút Hủy
-        btn_cancel = tk.Button(self.master, text="HỦY", command=self.app_manager.show_quanly_taikhoan_page,
-                               bg="#f0f0f0", fg="black", font=("Arial", 9))
-        btn_cancel.pack()
+        # Nút Hủy bỏ quay lại giao diện quản trị nhân viên
+        tk.Button(self.master, text="HỦY BỎ", command=self.app_manager.show_quanly_taikhoan_page,
+                  bg="white", fg="#636e72", font=("Segoe UI", 9), bd=0, cursor="hand2").pack()
 
     def update(self):
-        """Hàm lưu thông tin nhân viên đã sửa vào database/tk.csv"""
-        # Thu thập dữ liệu mới
-        new_row = [
-            self.ents["User:"].get().strip(),
-            self.ents["Pass:"].get().strip(),
-            self.ents["Tên:"].get().strip(),
-            self.ents["SĐT:"].get().strip(),
-            self.ents["Quyền:"].get()
-        ]
+        """XỬ LÝ GHI ĐÈ THÔNG TIN NHÂN SỰ MỚI VÀO CƠ SỞ DỮ LIỆU SQL"""
+        u = self.old_username
+        p = self.ents["Pass:"].get().strip()
+        n = self.ents["Tên:"].get().strip()
+        s = self.ents["SĐT:"].get().strip()
+        r = self.ents["Quyền:"].get().strip()  # Quyền tự do nhập (ví dụ: Thu ngân, Quản trị viên, Tư vấn...)
 
-        if not new_row[0] or not new_row[1]:
-            messagebox.showerror("Lỗi", "Tài khoản và Mật khẩu không được để trống!")
+        if not p or not n:
+            messagebox.showerror("Error", "Mật khẩu và Họ tên nhân viên không được để trống!")
             return
 
-        rows = []
-        path = "database/tk.csv"
+        # Thực thi câu lệnh UPDATE chỉnh sửa thông tin tài khoản nhân sự
+        sql = "UPDATE users SET password=?, fullname=?, phone=?, role=? WHERE username=?"
         try:
-            if not os.path.exists(path):
-                messagebox.showerror("Lỗi", "Không tìm thấy file dữ liệu nhân viên!")
-                return
-
-            # Đọc file và thay thế dòng cũ bằng dòng mới
-            with open(path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                for r in reader:
-                    if len(r) > 0 and r[0] == self.old_username:
-                        rows.append(new_row)  # Thay bằng dữ liệu mới
-                    else:
-                        rows.append(r)  # Giữ nguyên các dòng khác
-
-            # Ghi lại toàn bộ danh sách vào file
-            with open(path, "w", encoding="utf-8", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerows(rows)
-
-            messagebox.showinfo("Thành công", f"Đã cập nhật thông tin cho nhân viên: {new_row[2]}")
-            # Quay lại trang Quản lý tài khoản
+            self.app_manager.db.query(sql, (p, n, s, r, u))
+            messagebox.showinfo("Success", f"Đã phân công nhiệm vụ mới cho {n}!")
             self.app_manager.show_quanly_taikhoan_page()
-
         except Exception as e:
-            messagebox.showerror("Lỗi hệ thống", f"Không thể lưu dữ liệu: {str(e)}")
+            messagebox.showerror("System Error", f"Lỗi cập nhật: {str(e)}")
