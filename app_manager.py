@@ -15,7 +15,6 @@ class AppManager:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("HỆ THỐNG QUẢN LÝ GUNDAM STORE")
-
         # Tự động tối đa hóa cửa sổ (Full màn hình) ngay khi chạy ứng dụng
         try:
             self.root.state('zoomed')  # Tương thích Windows & macOS
@@ -27,7 +26,6 @@ class AppManager:
                 w = self.root.winfo_screenwidth()
                 h = self.root.winfo_screenheight()
                 self.root.geometry(f"{w}x{h}+0+0")
-
         self.db = DatabaseHelper()
         self.current_page = None
         self.current_user = None
@@ -81,6 +79,11 @@ class AppManager:
     def show_sua_nhanvien_page(self, data):
         self.clear_current_page()
         self.current_page = SuaNhanVienPage(self.root, self, data)
+
+    def show_baocao_page(self):  # HÀM MỞ TRANG BÁO CÁO
+        self.clear_current_page()
+        self.root.geometry("1280x800")
+        self.current_page = BaoCaoPage(self.root, self)
 
     def run(self):
         self.root.mainloop()
