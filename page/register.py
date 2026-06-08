@@ -127,8 +127,10 @@ class RegisterPage:
 
     def back(self):
         if self.app_manager.current_user:
+            # Nếu đang là Admin đăng nhập: Quay lại trang quản lý nhân sự
             self.app_manager.show_quanly_taikhoan_page()
         else:
+            # Nếu là khách chưa đăng nhập: Quay về trang login
             self.app_manager.show_login_page()
 
     def save(self):

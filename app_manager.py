@@ -89,5 +89,10 @@ class AppManager:
         self.clear_current_page()
         self.current_page = SuaNhanVienPage(self.root, self, data)
 
+    def show_baocao_page(self):  # HÀM MỞ TRANG BÁO CÁO
+        self.clear_current_page()
+        self.root.geometry("1280x800")
+        self.current_page = BaoCaoPage(self.root, self)
+
     def run(self):
         self.root.mainloop()

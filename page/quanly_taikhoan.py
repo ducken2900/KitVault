@@ -272,7 +272,9 @@ class QuanLyTaiKhoanPage:
                                bd=0, height=2, width=15, cursor="hand2")
         btn_cancel.pack(side="right", padx=(10, 50), expand=True)
 
+
     def delete_user(self):
+        """XÓA TÀI KHOẢN NHÂN VIÊN VỚI CƠ CHẾ BẢO VỆ ADMIN"""
         sel = self.tree1.selection()
         if not sel:
             messagebox.showwarning("Thông báo", "Vui lòng chọn nhân viên cần xóa trong danh sách bảng!")
@@ -352,7 +354,6 @@ class QuanLyTaiKhoanPage:
         for i in self.tree2.get_children(): self.tree2.delete(i)
 
         sql = "SELECT username, time, status FROM login_history ORDER BY time DESC"
-
         try:
             rows = self.app_manager.db.query(sql)
             for idx, r in enumerate(rows, 1):
